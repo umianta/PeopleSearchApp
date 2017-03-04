@@ -1,0 +1,128 @@
+﻿@model IEnumerable<PeopleSearchApp.Models.User>
+
+@{
+    ViewBag.Title = "People Search App";
+}
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+
+<script type="text/javascript">
+
+    function ajaxindicatorstart(text) {
+        if (jQuery('body').find('#resultLoading').attr('id') != 'resultLoading') {
+            jQuery('body').append('<div id="resultLoading" style="display:none"><div><img src="../Images/ajax-loader1.gif" ><div>' + text + '</div></div><div class="bg"></div></div>');
+        }
+
+        jQuery('#resultLoading').css({
+            'width': '100%',
+            'height': '100%',
+            'position': 'fixed',
+            'z-index': '10000000',
+            'top': '0',
+            'left': '0',
+            'right': '0',
+            'bottom': '0',
+            'margin': 'auto'
+        });
+
+        jQuery('#resultLoading .bg').css({
+            'background': '#000000',
+            'opacity': '0.7',
+            'width': '100%',
+            'height': '100%',
+            'position': 'absolute',
+            'top': '0'
+        });
+
+        jQuery('#resultLoading>div:first').css({
+            'width': '250px',
+            'height': '75px',
+            'text-align': 'center',
+            'position': 'fixed',
+            'top': '0',
+            'left': '0',
+            'right': '0',
+            'bottom': '0',
+            'margin': 'auto',
+            'font-size': '16px',
+            'z-index': '10',
+            'color': '#ffffff'
+
+        });
+
+        jQuery('#resultLoading .bg').height('100%');
+        jQuery('#resultLoading').fadeIn(300);
+        jQuery('body').css('cursor', 'wait');
+    }
+
+    function ajaxindicatorstop() {
+        jQuery('#resultLoading .bg').height('100%');
+        jQuery('#resultLoading').fadeOut(300);
+        jQuery('body').css('cursor', 'default');
+    }
+
+    $(document).ready(function () {
+
+        $("#btnSearch").click(function () {
+            ajaxindicatorstart("Please wait ..");
+            $("#tblPerson tbody tr").remove();
+
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("UserSearch")',
+                dataType: 'json',
+                data: { searchString: $("#txtSearch").val() },
+                success: function (data) {
+                    var items = '';
+
+                    $.each(data, function (i, item) {
+
+                        var rows = "<tr class='container-fluid well span2'>"
+                        + "<td width='170px'> &nbsp;&nbsp;<img src='https://secure.gravatar.com/avatar/de9b11d0f9c0569ba917393ed5e5b3ab?s=140&r=g&d=mm' class='img-circle' ></br> &nbsp;&nbsp; &nbsp;<b>" + item.FirstName + " " + item.LastName + "</b></td>"
+                        + "<td ><b>Address:</b>"+ item.Address+"</br><b>Age:</b>"+item.Age+"<br/><b>Interest:</b>"+ item.Interest+"</td>"
+                       
+                        + "</tr><tr><td>&nbsp;</td></tr>";
+                        $('#tblPerson tbody').append(rows);
+
+                    });
+                    ajaxindicatorstop();
+                },
+                error: function (ex) {
+                    var r = jQuery.parseJSON(response.responseText);
+                    alert("Message: " + r.Message);
+                    alert("StackTrace: " + r.StackTrace);
+                    alert("ExceptionType: " + r.ExceptionType);
+                    ajaxindicatorstop();
+                }
+            });
+            return false;
+        })
+    });
+
+</script>
+
+<h2>People Search</h2>
+<div class="row">
+    <div class="col-xs-12 col-md-3">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder=" First Name or Last Name" id="txtSearch" />
+            <div class="input-group-btn">
+                <button class="btn btn-primary" type="button" id="btnSearch">
+                    <span class="glyphicon glyphicon-search"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<br/>
+
+
+
+    <table  id="tblPerson" width="50%" >
+        
+        <tbody></tbody>
+
+    </table>
+
